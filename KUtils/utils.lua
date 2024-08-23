@@ -20,3 +20,16 @@ KAKOS.castBarCustomText = function(spellName, lenLimit)
         return ""
     end
 end
+
+KAKOS.sendMsg = function(...)
+	--This accepts any number of strings as inputs. This can be used to input a
+	--sequence of "/way x y" to make many TomTom waypoints at once.
+	local messages = {...}
+	for i, msg in ipairs(messages) do
+		ChatFrame_OpenChat("")
+		local edit = ChatEdit_GetActiveWindow();
+		edit:SetText(msg)
+		ChatEdit_SendText(edit,1)
+		ChatEdit_DeactivateChat(edit)
+	end
+end
