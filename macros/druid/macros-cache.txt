@@ -1,0 +1,51 @@
+VER 3 0100000000000017 "2" "134400"
+#showtooltip
+/cast [flying] Aerial Halt; [spec:1] Solar Beam;  Skull Bash
+END
+VER 3 010000000000001B "Cen Ward" "134400"
+#showtooltip Cenarion Ward
+/cast [@mouseover,help,nodead][@target,help,nodead][@player] Canarion Ward
+END
+VER 3 0100000000000004 "F" "134400"
+#showtooltip
+/cast [flying] Surge Forward; [spec:2] Shred; Wrath
+END
+VER 3 0100000000000019 "Lifebloom" "134400"
+#showtooltip
+/cast [@mouseover,help,nodead][@target,help,nodead][@player] Lifebloom
+END
+VER 3 0100000000000015 "Prowl" "INV_MISC_QUESTIONMARK"
+#showtooltip Prowl
+/cancelaura Travel Form
+/cast Prowl
+END
+VER 3 0100000000000009 "Regrowth" "134400"
+#showtooltip
+/cast [@mouseover,help,nodead][@target,help,nodead][@player] Regrowth
+END
+VER 3 0100000000000018 "Rejuv" "134400"
+#showtooltip
+/cast [@mouseover,help,nodead][@target,help,nodead][@player] Rejuvenation
+END
+VER 3 0100000000000014 "root" "INV_MISC_QUESTIONMARK"
+#showtooltip Entangling Roots
+/clearfocus [mod:ctrl]
+/focus [@focus,noexists]
+/cast [@focus,exists][@target,exists] Entangling Roots
+END
+VER 3 0100000000000006 "SF" "134400"
+#showtooltip
+/cast [flying] Whirling Surge; [spec:1] Starfire; [spec:4] Wild Growth; Thrash
+END
+VER 3 0100000000000016 "Shapeshft" "134400"
+#showtooltip [spec:2, noform:2][spec:3, form:1][spec:4, form:1] Cat Form; [spec:1, noform:4] Moonkin Form; Bear Form
+/cancelform [mod:alt]
+/cast [mod:shift][spec:2, nomod] Cat Form; [mod:ctrl][spec:3, nomod][spec:4,nomod] Bear Form; [spec:1] Moonkin Form
+END
+VER 3 0100000000000003 "Shapeshift rares" "1408835"
+/run for k,v in pairs({Keevah=78213, Moragh=78210, Ristar=77890, Mosa=77940, Cian=78211, Talthonei=77994}) do print(format("%s: %s", k, C_QuestLog.IsQuestFlaggedCompleted(v) and "\124cFFFF0000Completed\124r" or "\124cFF00FF00Not Completed\124r")) end
+END
+VER 3 010000000000001A "Swiftmend" "134400"
+#showtooltip
+/cast [@mouseover,help,nodead][@target,help,nodead][@player] Swiftmend
+END
