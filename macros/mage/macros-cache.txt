@@ -10,7 +10,7 @@ VER 3 0000000000000035 "Ice Block" "135841"
 /stopcasting
 /cast !Ice Block
 END
-VER 3 000000000000003A "CS" "135856"
+VER 3 000000000000003A "CS" "134400"
 #showtooltip
 /cast [flying] Aerial Halt; [mod:shift,@focus] Counterspell; Counterspell
 END
@@ -35,12 +35,12 @@ END
 VER 3 010000000000002F "Cancel Slowfall" "135992"
 /cancelaura Slow Fall
 END
-VER 3 0000000000000039 "WU" "135844"
+VER 3 0000000000000039 "WU" "134400"
 #showtooltip
 /cancelaura Ice Block
 /cast [spec:1] Arcane Barrage; [spec:2] Phoenix Flames; [spec:3] Ice Lance
 END
-VER 3 0100000000000029 "F" "135735"
+VER 3 0100000000000029 "F" "134400"
 #showtooltip
 /cast [flying] Surge Forward; [spec:1] Arcane Blast; [spec:2] Fireball; [spec:3] Frostbolt
 END
