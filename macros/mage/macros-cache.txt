@@ -1,0 +1,54 @@
+VER 3 0000000000000044 "Food" "Spell_Arcane_MassDispel."
+/cast Conjure Refreshment
+END
+VER 3 0000000000000045 "Blink" "135736"
+#showtooltip
+/cast Blink
+END
+VER 3 0000000000000035 "Ice Block" "135841"
+#showtooltip Ice Block
+/stopcasting
+/cast !Ice Block
+END
+VER 3 000000000000003A "CS" "135856"
+#showtooltip
+/cast [flying] Aerial Halt; [mod:shift,@focus] Counterspell; Counterspell
+END
+VER 3 0000000000000042 "Decurse" "136082"
+#showtooltip Remove Curse
+/cast [@mouseover,help,nodead][@target,help,nodead][@player] Remove Curse
+END
+VER 3 0000000000000034 "Freeze" "135848"
+#showtooltip Freeze
+/cast Freeze
+END
+VER 3 000000000000003B "Polymorph" "136071"
+#showtooltip Polymorph(Sheep)
+/clearfocus [mod:ctrl]
+/focus [@focus,noexists]
+/cast [@focus,exists][@target,exists] Polymorph(Black Cat)
+END
+VER 3 0000000000000049 "Slowfall" "135992"
+#showtooltip
+/cast [@mouseover,help,nodead][@target,help,nodead][@player] Slow Fall
+END
+VER 3 010000000000002F "Cancel Slowfall" "135992"
+/cancelaura Slow Fall
+END
+VER 3 0000000000000039 "WU" "135844"
+#showtooltip
+/cancelaura Ice Block
+/cast [spec:1] Arcane Barrage; [spec:2] Phoenix Flames; [spec:3] Ice Lance
+END
+VER 3 0100000000000029 "F" "135735"
+#showtooltip
+/cast [flying] Surge Forward; [spec:1] Arcane Blast; [spec:2] Fireball; [spec:3] Frostbolt
+END
+VER 3 010000000000003A "SF" "134400"
+#showtooltip
+/cast [flying] Whirling Surge(Skyriding); [spec:1] Arcane Missiles; [spec:2] Pyroblast; [spec:3] Glacial Spike
+END
+VER 3 0100000000000039 "CF" "134400"
+#showtooltip
+/cast [flying] Second Wind; [spec:1] Touch of the Magi; [spec:2] Flamestrike; [spec:3] Blizzard
+END
