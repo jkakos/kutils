@@ -27,7 +27,7 @@ VER 3 0100000000000018 "Rejuv" "134400"
 #showtooltip
 /cast [@mouseover,help,nodead][@target,help,nodead][@player] Rejuvenation
 END
-VER 3 0100000000000014 "root" "INV_MISC_QUESTIONMARK"
+VER 3 0100000000000014 "Roots" "INV_MISC_QUESTIONMARK"
 #showtooltip Entangling Roots
 /clearfocus [mod:ctrl]
 /focus [@focus,noexists]
@@ -48,4 +48,8 @@ END
 VER 3 010000000000001A "Swiftmend" "134400"
 #showtooltip
 /cast [@mouseover,help,nodead][@target,help,nodead][@player] Swiftmend
+END
+VER 3 010000000000001C "CF" "134400"
+#showtooltip
+/cast [flying] Second Wind; [spec:1] Starsurge; Ferocious Bite
 END
