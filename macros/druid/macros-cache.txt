@@ -35,7 +35,7 @@ VER 3 0100000000000014 "Roots" "INV_MISC_QUESTIONMARK"
 END
 VER 3 0100000000000006 "SF" "134400"
 #showtooltip
-/cast [flying] Whirling Surge; [spec:1] Starfire; [spec:4] Wild Growth; Thrash
+/cast [flying] Whirling Surge(skyriding); [spec:1] Starfire; [spec:4] Wild Growth; Thrash
 END
 VER 3 0100000000000016 "Shapeshft" "134400"
 #showtooltip [spec:2, noform:2][spec:3/4, form:1] Cat Form; [spec:1, noform:4] Moonkin Form; Bear Form
