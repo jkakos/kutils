@@ -2,8 +2,9 @@ KAKOS.getSpecColor = function(className, specId)
     --get (r, g, b) values to use for a given class spec
     specColors = {
 	    ["Druid"] = {{0.30, 0.52, 1.00}, {1.00, 0.49, 0.04}, {1.00, 0.49, 0.04}, {0.13, 0.68, 0.19}},
-        ["Mage"] = {{0.7, 0.3, 1.0}, {0.8, 0.3, 0.0}, {0.0, 0.5, 1.0}},
+        ["Mage"] = {{0.7, 0.3, 1.0}, {1.00, 0.38, 0.00}, {0.0, 0.5, 1.0}},
 		["Monk"] = {{0.0, 1.0, 0.6}, {0.0, 1.0, 0.6}, {0.0, 1.0, 0.6}},
+		["Death Knight"] = {{0.77, 0.12, 0.23}, {0.0, 0.5, 1.0}, {0.4, 0.76, 0.28}},
     }
     return unpack(specColors[className][specId])
 end
