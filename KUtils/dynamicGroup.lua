@@ -1,5 +1,5 @@
 KAKOS.getMaxIcons = function(rowLimit)
-    --claculate the number of icons allowed to be displayed
+    --calculate the number of icons allowed to be displayed
     local totalAllowedIcons = 0  --num total icons to show
     local cumulRowLimit = {}  --cumulative row limits
     
@@ -55,17 +55,16 @@ end
 
 KAKOS.growFunc = function(newPositions, activeRegions, rowLimit, iconSize, spacing, zoom)
     --Main grow function for dynamic groups. This will create rows of icons with a
-	--number of icons on each row determined by 'rowLimit'.
-	--Parameters:
-	--  newPositions, activeRegions are passed by WeakAuras for the custom
-	--    grow function
-	--	rowLimit: table of int, the length determines the number of rows
-	--    and the values determine the number of icons on each row
-	--  iconSize: table of int, should have the same shape as 'rowLimit'
-	--    and each value sets the size of icons on each row
-	--  spacing: int, amount of spacing between icons and rows
-	--  zoom: float from 0 to 1, sets the zoom on icons (e.g., 0.25 sets
-	--    25% zoom)
+    --number of icons on each row determined by 'rowLimit'.
+    --Parameters:
+    --  newPositions, activeRegions are passed by WeakAuras for the custom
+    --    grow function
+    --  rowLimit: table of int, the length determines the number of rows
+    --    and the values determine the number of icons on each row
+    --  iconSize: table of int, should have the same shape as 'rowLimit'
+    --    and each value sets the size of icons on each row
+    --  spacing: int, amount of spacing between icons and rows
+    --  zoom: float from 0 to 1, sets the zoom on icons (e.g., 0.25 sets 25% zoom) 
     local numIcons = #activeRegions  --num total icons in the group
     
     --find the number of icons that will be on each row
