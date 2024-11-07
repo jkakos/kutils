@@ -1,6 +1,7 @@
 local function loadCVars()
     SetCVar("raidOptionDisplayMainTankAndAssist", 0)
     SetCVar("autoLootDefault", 1)
+	SetCVar("AutoPushSpellToActionBar", 0)
 end
 
 local CVarLoader = CreateFrame("Frame")
