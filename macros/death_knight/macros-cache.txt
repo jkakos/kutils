@@ -1,0 +1,53 @@
+VER 3 0100000000000009 "2" "134400"
+#showtooltip
+/cast [flying] Aerial Halt; Mind Freeze
+END
+VER 3 010000000000000B "All CDs" "458718"
+#showtooltip Pillar of Frost
+/use 14
+/cast Pillar of Frost
+/cast Frostwyrm's Fury
+/cast Empower Rune Weapon
+/cast Raise Dead
+END
+VER 3 0100000000000005 "Asphyxiate" "134400"
+#showtooltip Asphyxiate
+/clearfocus [mod:ctrl]
+/focus [@focus,noexists]
+/cast [@focus,exists][@target,exists] Asphyxiate
+END
+VER 3 0100000000000008 "CF" "134400"
+#showtooltip
+/cast [flying] Second Wind; Death Coil
+END
+VER 3 0100000000000006 "F" "134400"
+#showtooltip
+/cast [flying] Surge Forward; Frost Strike
+END
+VER 3 010000000000000C "kick zekvir" "134400"
+#showtooltip
+/focus boss1
+/cast [@focus] Mind Freeze
+END
+VER 3 0100000000000004 "Mount" "134400"
+#showtooltip
+/cast [combat] Acherus Deathcharger; [flyable] Deathlord's Vilebrood Vanquisher; [spec:3] Green Skeletal Warhorse; [spec:1] Midnight; Rivendare's Deathcharger
+END
+VER 3 010000000000000A "Rune Weapon" "134400"
+#showtooltip [spec:1] Dancing Rune Weapon; [spec:2] Empower Rune Weapon
+/use 14
+/cast [spec:1] Dancing Rune Weapon; [spec:2 ] Empower Rune Weapon
+END
+VER 3 0100000000000007 "SF" "134400"
+#showtooltip
+/cast [flying] Whirling Surge(skyriding); Howling Blast
+END
+VER 3 0100000000000001 "Spec" "135775"
+/run SetSpecialization(SecureCmdOptionParse("[mod:ctrl] 1; [mod:shift] 2; 3"))
+END
+VER 3 0100000000000002 "Spec2" "135770"
+/run SetSpecialization(SecureCmdOptionParse("[mod:ctrl] 1; [mod:shift] 2; 3"))
+END
+VER 3 0100000000000003 "Spec3" "135773"
+/run SetSpecialization(SecureCmdOptionParse("[mod:ctrl] 1; [mod:shift] 2; 3"))
+END
