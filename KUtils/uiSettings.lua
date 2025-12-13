@@ -2,6 +2,11 @@ local function loadCVars()
     SetCVar("raidOptionDisplayMainTankAndAssist", 0)
     SetCVar("autoLootDefault", 1)
 	SetCVar("AutoPushSpellToActionBar", 0)
+	SetCVar("enableMultiActionBars", 127)
+	SetCVar("pvpFramesDisplayClassColor", 1)
+	SetCVar("raidFramesDisplayClassColor", 1)
+	SetCVar("ShowClassColorInFriendlyNameplate", 1)
+	SetCVar("ShowClassColorInNameplate", 1)
 end
 
 local CVarLoader = CreateFrame("Frame")
