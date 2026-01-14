@@ -2,8 +2,8 @@ KAKOS.getMaxIcons = function(rowLimit)
     --calculate the number of icons allowed to be displayed
     local totalAllowedIcons = 0  --num total icons to show
     local cumulRowLimit = {}  --cumulative row limits
-    
-    for i = 1, #rowLimit do        
+
+    for i = 1, #rowLimit do
         totalAllowedIcons = totalAllowedIcons + rowLimit[i]
         cumulRowLimit[i] = totalAllowedIcons
     end
@@ -27,24 +27,41 @@ KAKOS.getIconsPerRow = function(numIcons, rowLimit, totalAllowedIcons, cumulRowL
     return iconsPerRow
 end
 
-KAKOS.getRowXLeft = function(iconsPerRow, iconSize, spacing) 
+KAKOS.getRowXLeft = function(iconsPerRow, iconSize, spacing, width)
     --calculate the left position based on the number of icons in the row
-    local xLeft = {} --where the left edge of the row will start
-    for i = 1, #iconsPerRow do
-        local offset = (iconSize[i] + spacing) / 2
-        xLeft[i] = -(iconsPerRow[i] * (iconSize[i] + spacing)) / 2 + offset      
+    local xLeft = {} -- where the left edge of the row will start
+    local width = width or 0
+    for i, count in ipairs(iconsPerRow) do
+        local rowWidth = count * iconSize[i] + (count - 1) * spacing
+
+        -- handle shift from WeakAuras
+        local offset = 0
+        if width == 0 then
+            offset = (iconSize[i] + spacing) / 2
+        end
+
+        xLeft[i] = (width - rowWidth) / 2 + offset
     end
-    return xLeft   
+    -- for i = 1, #iconsPerRow do
+    --     local offset = (iconSize[i] + spacing) / 2
+    --     xLeft[i] = -(iconsPerRow[i] * (iconSize[i] + spacing)) / 2 + offset
+    -- end
+    return xLeft
 end
 
 KAKOS.getIconY = function(rowIdx, iconSize, spacing)
     --calculate the vertical position based on the row number
     local y = 0
-    
+
+    -- for i = 1, rowIdx - 1 do
+    --     y = y - iconSize[i] - spacing
+    -- end
+    -- return y
+
     if rowIdx == 1 then
-        return y  --keep starting row ay y = 0
+        return y  --keep starting row at y = 0
     end
-    
+
     for i = 1, rowIdx do
         y = y - iconSize[i]
     end
@@ -64,42 +81,42 @@ KAKOS.growFunc = function(newPositions, activeRegions, rowLimit, iconSize, spaci
     --  iconSize: table of int, should have the same shape as 'rowLimit'
     --    and each value sets the size of icons on each row
     --  spacing: int, amount of spacing between icons and rows
-    --  zoom: float from 0 to 1, sets the zoom on icons (e.g., 0.25 sets 25% zoom) 
+    --  zoom: float from 0 to 1, sets the zoom on icons (e.g., 0.25 sets 25% zoom)
     local numIcons = #activeRegions  --num total icons in the group
-    
+
     --find the number of icons that will be on each row
     local totalAllowedIcons, cumulRowLimit = KAKOS.getMaxIcons(rowLimit)
     local iconsPerRow = KAKOS.getIconsPerRow(numIcons, rowLimit, totalAllowedIcons, cumulRowLimit)
-    
+
     --set the left position based on the number of icons in the row
     local xLeft = KAKOS.getRowXLeft(iconsPerRow, iconSize, spacing)
-    
+
     local rowIdx = 1
     for i, regionData in ipairs(activeRegions) do
         local region = regionData.region
-        
+
         --remove visual of any auras exceeding the set limit
         if i > totalAllowedIcons then
             break
         end
-        
+
         --move to next row if necessary
         if i > cumulRowLimit[rowIdx] then
             rowIdx = rowIdx + 1
         end
-        
+
         --place icons going from xLeft to the right using iconSize and spacing
-        -- and set the y position based on the row    
+        -- and set the y position based on the row
         local xNew = (
             xLeft[rowIdx]
             + ((i-1) - (cumulRowLimit[rowIdx-1] or 0)) * (iconSize[rowIdx]
             + spacing)
         )
         local yNew = KAKOS.getIconY(rowIdx, iconSize, spacing)
-        
+
         --update aura parameters
         region:SetWidth(iconSize[rowIdx])
-        region:SetHeight(iconSize[rowIdx])        
+        region:SetHeight(iconSize[rowIdx])
         region:SetZoom(zoom)
         newPositions[i] = {xNew, yNew}
     end

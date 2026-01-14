@@ -7,3 +7,8 @@ core.lua
 utils.lua
 dynamicGroup.lua
 uiSettings.lua
+playerSpeed.lua
+chatColor.lua
+CombatUI/uiConfig.lua
+CombatUI/helpers.lua
+CombatUI/cooldownManager.lua

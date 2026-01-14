@@ -12,7 +12,7 @@ end
 local CVarLoader = CreateFrame("Frame")
 CVarLoader:RegisterEvent("PLAYER_ENTERING_WORLD")
 CVarLoader:SetScript(
-    "OnEvent", 
+    "OnEvent",
     function(self, event)
         if event == "PLAYER_ENTERING_WORLD" then
             loadCVars()
@@ -27,7 +27,7 @@ local function toggleCastBar(frame)
     else
         PlayerCastingBarFrame:RegisterAllEvents()
         frame.isShown = true
-        
+
     end
 end
 
@@ -38,7 +38,7 @@ castBarFrame:SetScript(
     function(self, event)
         if event == "PLAYER_ENTERING_WORLD" then
             self.isShown = true
-            toggleCastBar(self)            
+            -- toggleCastBar(self)
         end
     end
 )
