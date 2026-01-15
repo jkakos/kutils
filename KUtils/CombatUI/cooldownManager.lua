@@ -219,9 +219,15 @@ function addon:StyleBuffBar(entry)
 end
 
 -- Apply coloring to buff bars (updated for specs)
-function addon:ColorBarTexture(barTexture)
+function addon:ColorBarTexture(barTexture, r, g, b, a)
     if not barTexture then return end
-    barTexture:SetVertexColor(addon:GetSpecColor(nil, addon.currentSpec))
+
+    if r and g and b then
+        a = a or 1
+        barTexture:SetVertexColor(r, g, b, a)
+    else
+        barTexture:SetVertexColor(addon:GetSpecColor(nil, addon.currentSpec))
+    end
 end
 
 -----------------------------------------------------------------------
@@ -261,49 +267,30 @@ function addon:StyleCastBar()
     end
 
     -- Remove Blizzard art
-    -- if bar.Border then bar.Border:Hide() end
     if bar.Icon then bar.Icon:Hide() end
+    bar.InterruptGlow:Hide()  -- hide red spell interrupt glow
+    bar.TextBorder:Hide()  -- hide the lower texture that normally shows the cast name
 
     -- Size
     bar:SetSize(barWidth, barHeight)
 
     -- Texture
-    -- bar:SetStatusBarTexture(barTexture)
-    -- bar:SetStatusBarColor(addon:GetSpecColor(nil, addon.currentSpec))
     local tex = bar:GetStatusBarTexture()
-        if tex and tex:GetTexture() ~= addon.castBarConfig.barTexture then
-            tex:SetTexture(addon.castBarConfig.barTexture)
+    if tex and tex:GetTexture() ~= addon.castBarConfig.barTexture then
+        tex:SetTexture(addon.castBarConfig.barTexture)
+
+        if addon.castBarInterrupted then
+            addon:ColorBarTexture(tex, 1, 0, 0, 1)  -- color red if spell interrupted
+        else
             addon:ColorBarTexture(tex)
         end
-    bar.Spark:Hide()
-
-    -- Background
-    -- addon:AddIconBackground(bar, 0.086, 0.086, 0.086, 1)
-    -- bar.Background:Hide()
-
-    -- bar.BorderMask:Hide()
-    -- bar.BG = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
-    -- bar.BG:SetAllPoints(bar)
-    -- bar.BG:SetColorTexture(0, 0, 0, 0.8)
-
-    -- Inner border
-    -- addon:AddBarInnerBorder(bar, borderThickness, 0, 0, 0, 1, true)
+    end
 
     -- Spell name (left)
     bar.Text:ClearAllPoints()
     bar.Text:SetPoint("LEFT", bar, 4, 0)
     bar.Text:SetJustifyH("LEFT")
     bar.Text:SetFont("Fonts\\FRIZQT__.TTF", fontSize) --, "THINOUTLINE")
-
-    -- Time remaining (right)
-    -- if not bar.TimeText then
-    --     bar.TimeText = bar:CreateFontString(nil, "OVERLAY")
-    --     bar.TimeText:SetFontObject(GameFontHighlightSmall)
-    --     bar.TimeText:SetPoint("RIGHT", bar, 0, 0)
-    --     bar.TimeText:SetJustifyH("LEFT")
-    --     bar.TimeText:SetWidth(30)
-    --     bar.TimeText:SetFont("Fonts\\FRIZQT__.TTF", fontSize) --, "THINOUTLINE")
-    -- end
 end
 
 function addon:PositionCastBar()
@@ -571,12 +558,22 @@ castBarFrame:SetScript("OnEvent", function(_, _, unit)
 
         -- Reapply texture any time it updates
         hooksecurefunc(PlayerCastingBarFrame, "SetStatusBarTexture", function(self)
-            -- local bar = PlayerCastingBarFrame
-            -- bar:SetStatusBarTexture(addon.castBarConfig.barTexture)
             local tex = self:GetStatusBarTexture()
             if tex and tex:GetTexture() ~= addon.castBarConfig.barTexture then
                 tex:SetTexture(addon.castBarConfig.barTexture)
             end
+        end)
+        hooksecurefunc(PlayerCastingBarFrame, "ShowSpark", function(self)
+            self:HideSpark()
+        end)
+
+        -- Recolor the cast bar if a spell has been interruppted
+        hooksecurefunc(PlayerCastingBarFrame, "PlayInterruptAnims", function(self)
+            addon.castBarInterrupted = true
+        end)
+
+        hooksecurefunc(PlayerCastingBarFrame, "StopInterruptAnims", function(self)
+            addon.castBarInterrupted = false
         end)
     end
 end)
