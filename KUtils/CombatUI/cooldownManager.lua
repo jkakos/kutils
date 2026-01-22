@@ -1,6 +1,28 @@
+local _, addon = ...
 -----------------------------------------------------------------------
 -- ICONS
 -----------------------------------------------------------------------
+-- Decide whether to show a viewer given the viewer and combat state
+local function ShouldShowIcon(viewer)
+    if addon.DISPLAY_CDM_OUTSIDE_COMBAT then
+        return true
+    elseif addon.inCombat then
+        return true
+    else
+        return viewer == BuffIconCooldownViewer
+    end
+end
+
+local function EnforceIconVisibility(button, viewer)
+    local show = ShouldShowIcon(viewer)
+
+    if show then
+        button:Show()
+    else
+        button:Hide()
+    end
+end
+
 -- Modify the cooldown manager viewers that display icons. This will
 -- reposition and resize icons on a row-by-row basis. A border will
 -- also be added to each icon for a cleaner look.
@@ -23,21 +45,21 @@ function addon:LayoutIcons(viewer, buttons)
 
     for i, button in ipairs(buttons) do
         button:SetScale(1)
-        if viewer ~= UtilityCooldownViewer then
+        if viewer == BuffIconCooldownViewer then
             button:SetTimerShown(false)
         end
     end
 
     local activeButtons = buttons
-    if (viewer == BuffIconCooldownViewer) or (viewer == UtilityCooldownViewer) then
-        activeButtons = {}
-        for _, button in ipairs(buttons) do
-            if button.isActive then
-                table.insert(activeButtons, button)
-            else
-                button:Hide()
-            end
-        end
+
+    -- Reposition buff icons when they're active so they become centered by default
+    if (viewer == BuffIconCooldownViewer) then
+       activeButtons = {}
+       for _, button in ipairs(buttons) do
+           if button:IsShown() then
+               table.insert(activeButtons, button)
+           end
+       end
     end
 
     local rowLimit        = config.rowLimit
@@ -54,11 +76,15 @@ function addon:LayoutIcons(viewer, buttons)
     local xLeft = addon:GetRowXLeft(iconsPerRow, iconSize, spacing, viewerWidth)
     local rowIdx = 1
 
+
     for i, button in ipairs(activeButtons) do
         -- Hide any icons beyond the defined limits
         if i > totalAllowedIcons then
             button:Hide()
+            button:SetParent(nil)  -- prevent the icon from displaying again
         else
+            button:SetParent(viewer)  -- ensure the icon has a parent because of frame recycling
+
             -- Update the row index
             if i > (cumulRowLimit[rowIdx] or 0) then
                 rowIdx = rowIdx + 1
@@ -73,14 +99,11 @@ function addon:LayoutIcons(viewer, buttons)
             button:SetPoint("TOPLEFT", viewer, "TOPLEFT", xNew, yNew)
             button:SetSize(iconSize[rowIdx], iconSize[rowIdx])
 
-            if not addon.DISPLAY_CDM_OUTSIDE_COMBAT then
-                if addon.inCombat then
-                    button:Show()
-                elseif viewer ~= BuffIconCooldownViewer then
-                    button:Hide()
-                end
-            else
+            -- -- Show or hide icons
+            if ShouldShowIcon(viewer) then
                 button:Show()
+            else
+                button:Hide()
             end
 
             -- Add a black border to the icons
@@ -111,27 +134,32 @@ function addon:LayoutBuffBars(viewer)
     viewer:ClearAllPoints()
     viewer:SetPointOverride("BOTTOM", UIParent, "TOP", addon.baseUIPosition.x, addon.baseUIPosition.y)
 
+    -- Initial style pass and setting the bar order
     for _, entry in ipairs({viewer:GetChildren()}) do
-        if entry.auraInstanceID and not addon.buffBarOrder[entry] then
+        if entry:IsShown() and addon.buffBarOrder[entry] == nil then
             local _, _, _, _, yInitial = entry:GetPoint()
-            addon.buffBarOrder[entry] = yInitial
-            entry:ClearAllPoints()
-            entry:SetPoint("BOTTOM", viewer, "BOTTOM", 0, 0)
-            entry:SetSize(barWidth, 100)
+            addon.buffBarOrder[entry] = yInitial or -500
+            entry:SetSize(barWidth, 100)  -- keep the edit mode box large enough to see
         end
     end
 
     -- Collect active bars
     local active = {}
-    for i, entry in ipairs({viewer:GetChildren()}) do
-        if entry.isActive then
+    for _, entry in ipairs({viewer:GetChildren()}) do
+        if entry.Bar then
+            addon:SetBuffBarPosition(entry)
+        end
+
+        if entry:IsShown() then
             table.insert(active, entry)
         end
     end
 
     -- Sort active according to the cooldown manager order
     table.sort(active, function(a, b)
-        return addon.buffBarOrder[a] > addon.buffBarOrder[b]
+        local ya = addon.buffBarOrder[a] or -500
+        local yb = addon.buffBarOrder[b] or -500
+       return ya > yb
     end)
 
     -- Show and position the allowed number of bars
@@ -146,6 +174,19 @@ function addon:LayoutBuffBars(viewer)
             entry:Hide()
         end
     end
+end
+
+function addon:SetBuffBarPosition(entry)
+    local bar = entry.Bar
+    if not bar then return end
+
+    local config    = addon.buffBarConfig
+    local barWidth  = config.barWidth
+    local barHeight = config.barHeight
+
+    bar:ClearAllPoints()
+    bar:SetPoint("BOTTOM", entry, "BOTTOM", 0, 0)
+    bar:SetSize(barWidth, barHeight)
 end
 
 -- Apply visual adjustments to buff bars
@@ -164,9 +205,8 @@ function addon:StyleBuffBar(entry)
     local fontSize        = config.fontSize
     local newBarTexture   = config.barTexture
 
-    bar:ClearAllPoints()
-    bar:SetPoint("BOTTOM", entry, "BOTTOM", 0, 0)
-    bar:SetSize(barWidth, barHeight)
+    addon:SetBuffBarPosition(entry)
+
     if bar._borderFrame then
         bar._borderFrame:SetAllPoints(bar)  -- keeps the border aligned
     end
@@ -197,7 +237,7 @@ function addon:StyleBuffBar(entry)
         -- nameText:SetShadowOffset(1, -1)
         nameText:SetTextColor(1, 1, 1, 1)  -- blue
         nameText:ClearAllPoints()
-        nameText:SetPoint("CENTER", 0, 0)
+        nameText:SetPoint("CENTER", 0, 1)
     end
 
     -- Duration timer text
@@ -211,10 +251,8 @@ function addon:StyleBuffBar(entry)
 
     -- Bar texture
     if barTexture and barTexture:GetObjectType() == "Texture" then
-        -- barTexture:SetTexture("Interface\\Tooltips\\UI-Tooltip-Background")
         barTexture:SetTexture(newBarTexture)
         addon:ColorBarTexture(barTexture)
-        -- barTexture:SetVertexColor(addon:GetSpecColor(UnitClass("player"), C_SpecializationInfo.GetSpecialization()))
     end
 end
 
@@ -276,15 +314,15 @@ function addon:StyleCastBar()
 
     -- Texture
     local tex = bar:GetStatusBarTexture()
-    if tex and tex:GetTexture() ~= addon.castBarConfig.barTexture then
-        tex:SetTexture(addon.castBarConfig.barTexture)
+        if tex and tex:GetTexture() ~= addon.castBarConfig.barTexture then
+            tex:SetTexture(addon.castBarConfig.barTexture)
 
-        if addon.castBarInterrupted then
-            addon:ColorBarTexture(tex, 1, 0, 0, 1)  -- color red if spell interrupted
-        else
-            addon:ColorBarTexture(tex)
+            if addon.castBarInterrupted then
+                addon:ColorBarTexture(tex, 0.7, 0, 0, 1)  -- color red if spell interrupted
+            else
+                addon:ColorBarTexture(tex)
+            end
         end
-    end
 
     -- Spell name (left)
     bar.Text:ClearAllPoints()
@@ -305,27 +343,13 @@ end
 -----------------------------------------------------------------------
 -- HOOKS
 -----------------------------------------------------------------------
--- Show or hide the borders and backgrounds if an icon is shown or hidden.
-function addon:HookButtonVisibility(button)
+-- Decide when to show or hide icons
+function addon:HookButtonVisibility(button, viewer)
     if button._addonVisHooked then return end
     button._addonVisHooked = true
 
     button:HookScript("OnShow", function(self)
-        if self._innerBorder then
-            for _, tex in ipairs(self._innerBorder) do tex:Show() end
-        end
-        if self._background then
-            self._background:Show()
-        end
-    end)
-
-    button:HookScript("OnHide", function(self)
-        if self._innerBorder then
-            for _, tex in ipairs(self._innerBorder) do tex:Hide() end
-        end
-        if self._background then
-            self._background:Hide()
-        end
+        EnforceIconVisibility(self, viewer)
     end)
 end
 
@@ -335,58 +359,116 @@ function addon:HookIconCooldownColor(button)
     button._addonCooldownColorHooked = true
 
     -- Do not desaturate when on cooldown
+    local inHook = false  -- avoid infinite recursion
     hooksecurefunc(button.Icon, "SetDesaturated", function(self, desat)
-        if desat then self:SetDesaturated(false) end
+        if inHook then return end
+        inHook = true
+        self:SetDesaturated(false)
+        inHook = false
     end)
 
-    local cd = button.Cooldown or button.cooldown
-    if cd and not cd._addonHooked then
-        cd._addonHooked = true
+    -- Color of swipe texture when aura is active
+    hooksecurefunc(button, "RefreshActive", function(self)
+        local cd = self.Cooldown
+        if not cd then return end
 
-        -- Color of swipe texture when aura is active or on cooldown
-        hooksecurefunc(cd, "SetCooldown", function(self, start, duration)
-            -- Aura is active
-            if (button.auraInstanceID) and (duration > 1.5) then
-                self:SetSwipeColor(unpack(addon.AURA_ACTIVE_SWIPE_COLOR))
-                self:SetReverse(true)
-                self:SetDrawEdge(true)
-            -- Aura is on global cooldown
-            elseif not (button.auraInstanceID) and (duration <= 1.5) then
-                self:SetSwipeColor(unpack(addon.GLOBAL_COOLDOWN_SWIPE_COLOR))
-                self:SetReverse(false)
-            -- Aura is on cooldown
-            else
-                self:SetSwipeColor(unpack(addon.BUTTON_COOLDOWN_SWIPE_COLOR))
-                self:SetReverse(false)
-                self:SetDrawEdge(true)
-            end
-        end)
+        if self.auraInstanceID then
+            -- cd:SetSwipeColor(unpack(addon.AURA_ACTIVE_SWIPE_COLOR))
+            local r, g, b, a = addon:GetSpecColor()
+            cd:SetSwipeColor(r, g, b, 0.7)
+            cd:SetDrawEdge(true)
+            cd:SetReverse(true)
+        else
+            cd:SetSwipeColor(unpack(addon.BUTTON_COOLDOWN_SWIPE_COLOR))
+            -- cd:SetDrawEdge(true)
+            cd:SetReverse(false)
+            -- cd:SetHideCountdownNumbers(true)
+        end
+    end)
+end
+
+-- Set font of cooldown timers
+function addon:AppylCooldownTimerFont(button)
+    if not button or not button.Cooldown then return end
+    if button._addonTimerFontHooked then return end
+    button._addonTimerFontHooked = true
+
+    local regions = {button.Cooldown:GetRegions()}
+
+    for _, region in ipairs(regions) do
+        if region:IsObjectType("FontString") then
+            -- region:ClearAllPoints()
+            -- region:SetPoint("BOTTOM", button.Cooldown, "CENTER", 0, 0)
+            region:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+            break
+        end
     end
 end
 
--- Helper function that sets which viewers should be hidden in combat
-function addon:ShouldHideViewer(viewer)
-    if addon.DISPLAY_CDM_OUTSIDE_COMBAT then
-        return false
-    end
+-- Set font of charges for icons with charges
+function addon:ApplyChargeFont(button)
+    if button._addonChargeFontHooked then return end
+    button._addonChargeFontHooked = true
 
-    return (
-        (viewer == EssentialCooldownViewer)
-        or (viewer == UtilityCooldownViewer)
-    ) and not addon.inCombat
+    if button and button.ChargeCount and button.ChargeCount.Current then
+        local chargeText = button.ChargeCount.Current
+        chargeText:ClearAllPoints()
+        chargeText:SetPoint("BOTTOMRIGHT", button.ChargeCount, "BOTTOMRIGHT", 1, 0)
+        chargeText:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+    end
+end
+
+-- Set font of number of applications for icons that can stack
+function addon:ApplyApplicationsFont(button)
+    if button._addonApplicationsHooked then return end
+    button._addonApplicationsHooked = true
+
+    if button and button.Applications and button.Applications.Applications then
+        local stacks = button.Applications.Applications
+        stacks:ClearAllPoints()
+        stacks:SetPoint("CENTER", button.Applications, "CENTER", 0, 0)
+        stacks:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+    end
+end
+
+-- Make sure the button glow matches the icon size
+function addon:SetButtonGlowSize(button)
+    if not button then return end
+
+    local alert = button.SpellActivationAlert
+    if not alert then return end
+
+    local width, height = button:GetSize()
+    local multiplier = 1.4
+    alert:SetSize(width * multiplier, height * multiplier)
+end
+
+-- Hide button glows out of combat
+function addon:HideButtonGlow(button)
+    if not button then return end
+
+    local alert = button.SpellActivationAlert
+    if alert then
+        if not addon.inCombat then alert:Hide() end
+    end
 end
 
 -- Essential Icons
 function addon:HookEssentialCooldownViewer()
     hooksecurefunc(EssentialCooldownViewer, "RefreshLayout", function(self)
+        addon:LayoutIcons(self)
+
         local buttons = self:GetItemFrames()
         if buttons then
             for _, button in ipairs(buttons) do
-                addon:HookIconCooldownColor(button)
+                addon:HookIconCooldownColor(button, viewer)
+                addon:HookButtonVisibility(button, viewer)
+                addon:ApplyChargeFont(button)
+                addon:AppylCooldownTimerFont(button)
+                addon:SetButtonGlowSize(button)
+                addon:HideButtonGlow(button)
             end
         end
-
-        addon:LayoutIcons(self)
     end)
 end
 
@@ -396,17 +478,16 @@ function addon:HookUtilityCooldownViewer()
     if not buttons then return end
 
     hooksecurefunc(UtilityCooldownViewer, "RefreshLayout", function(self)
+        addon:LayoutIcons(self)
+
         local buttons = self:GetItemFrames()
         if buttons then
             for _, button in ipairs(buttons) do
-                if not button._addonHooked then
-                    button._addonHooked = true
-                    addon:HookIconCooldownColor(button)
-                end
+                addon:HookIconCooldownColor(button)
+                addon:HookButtonVisibility(button, viewer)
+                addon:ApplyChargeFont(button)
             end
         end
-
-        addon:LayoutIcons(self)
     end)
 end
 
@@ -424,7 +505,9 @@ function addon:HookBuffIconCooldownViewer()
                 button._addonHooked = true
                 button:HookScript("OnShow", function() addon:LayoutIcons(self) end)
                 button:HookScript("OnHide", function() addon:LayoutIcons(self) end)
-                addon:HookIconCooldownColor(button)
+                -- addon:HookIconCooldownColor(button)
+                addon:ApplyChargeFont(button)
+                addon:ApplyApplicationsFont(button)
             end
         end
 
@@ -457,6 +540,29 @@ function addon:HookBuffBarCooldownViewer()
     end)
 end
 
+-- Action bar button glows
+hooksecurefunc(ActionButtonSpellAlertManager, "ShowAlert", function(_, button)
+    local IsAssistedCombatAction = C_ActionBar.IsAssistedCombatAction
+    local action = button.action
+    if not action then
+        -- don't hide glows from buttons that don't have actions (PTR issue reporter)
+        return
+    end
+    local spellType, id = GetActionInfo(action)
+    -- only check spell and macro glows
+    if id and (spellType == "spell" or spellType == "macro") then
+        if C_ActionBar.IsAssistedCombatAction(action) then
+            -- hide matched glows on the Single-Button Assistant button
+            if button.AssistedCombatRotationFrame and button.AssistedCombatRotationFrame.SpellActivationAlert then
+                button.AssistedCombatRotationFrame.SpellActivationAlert:Hide()
+            end
+        elseif button.SpellActivationAlert then
+            -- hide matched glows on regular action bars
+            button.SpellActivationAlert:Hide()
+        end
+    end
+end)
+
 -- Apply viewer hooks
 function addon:HookCooldownViewers()
     self:HookEssentialCooldownViewer()
@@ -480,26 +586,35 @@ end)
 local specFrame = CreateFrame("Frame")
 specFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 specFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
 specFrame:SetScript("OnEvent", function(_, event, unit)
     if event == "PLAYER_SPECIALIZATION_CHANGED" and unit ~= "player" then return end
     addon.currentSpec = C_SpecializationInfo.GetSpecialization()
 end)
 
 -- If hiding outside combat, hide the designated viewers
-if not addon.DISPLAY_CDM_OUTSIDE_COMBAT then
-    local iconViewers = {EssentialCooldownViewer, UtilityCooldownViewer}
-    local combatFrame = CreateFrame("Frame")
-    combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-    combatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+local iconViewers = {EssentialCooldownViewer, UtilityCooldownViewer}
+local combatFrame = CreateFrame("Frame")
+combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+combatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 
-    combatFrame:SetScript("OnEvent", function(_, event)
-        addon.inCombat = (event == "PLAYER_REGEN_DISABLED")
+combatFrame:SetScript("OnEvent", function(_, event)
+    addon.inCombat = (event == "PLAYER_REGEN_DISABLED")
 
+    -- Hide icons if necessary
+    if not addon.DISPLAY_CDM_OUTSIDE_COMBAT then
         for _, viewer in ipairs(iconViewers) do
             addon:LayoutIcons(viewer)
         end
-    end)
-end
+    end
+
+    local buttons = EssentialCooldownViewer:GetItemFrames()
+    if buttons then
+        for _, button in ipairs(buttons) do
+            addon:HideButtonGlow(button)
+        end
+    end
+end)
 
 -- Hook the cast bar
 local castBarFrame = CreateFrame("Frame")
@@ -563,6 +678,8 @@ castBarFrame:SetScript("OnEvent", function(_, _, unit)
                 tex:SetTexture(addon.castBarConfig.barTexture)
             end
         end)
+
+        -- Hide cast spark
         hooksecurefunc(PlayerCastingBarFrame, "ShowSpark", function(self)
             self:HideSpark()
         end)

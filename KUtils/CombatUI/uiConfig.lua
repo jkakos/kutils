@@ -6,7 +6,7 @@ addon.SPACING                     = 2
 addon.PRIMARY_RESOURCE_HEIGHT     = 16
 addon.SECONDARY_RESOURCE_HEIGHT   = 12
 addon.AURA_ACTIVE_SWIPE_COLOR     = {0, 0, 0, 0.7}
-addon.BUTTON_COOLDOWN_SWIPE_COLOR = {0, 0, 0, 0.7}
+addon.BUTTON_COOLDOWN_SWIPE_COLOR = {0, 0, 0, 0.8}
 addon.GLOBAL_COOLDOWN_SWIPE_COLOR = {0, 0, 0, 0.5}
 
 -- Recalculate the yOffset for buff icons based on the resource bar yOffset

@@ -1,4 +1,4 @@
-_, addon = ...
+local _, addon = ...
 
 -- Calculate the horizontal position based on the leftmost edge
 function addon:GetRowX(xLeft, idxInRow, iconSize, spacing)
@@ -158,27 +158,6 @@ function addon:AddBarInnerBorder(bar, thickness, r, g, b, a, isCastBar)
     border.right  = makeTex(frame, "TOPRIGHT",   "BOTTOMRIGHT", thickness, true )
     border.top    = makeTex(frame, "TOPLEFT",    "TOPRIGHT",    thickness, false)
     border.bottom = makeTex(frame, "BOTTOMLEFT", "BOTTOMRIGHT", thickness, false)
-
-    -- -- Left
-    -- border.left:SetPoint("TOPLEFT", -pad, pad)
-    -- border.left:SetPoint("BOTTOMLEFT", -pad, -pad)
-    -- border.left:SetWidth(thickness)
-
-    -- -- Right
-    -- border.right:SetPoint("TOPRIGHT", pad, pad)
-    -- border.right:SetPoint("BOTTOMRIGHT", pad, -pad)
-    -- border.right:SetWidth(thickness)
-
-    -- -- Top
-    -- border.top:SetPoint("TOPLEFT", -pad, pad)
-    -- border.top:SetPoint("TOPRIGHT", pad, pad)
-    -- border.top:SetHeight(thickness)
-
-    -- -- Bottom
-    -- border.bottom:SetPoint("BOTTOMLEFT", -pad, -pad)
-    -- border.bottom:SetPoint("BOTTOMRIGHT", pad, -pad)
-    -- border.bottom:SetHeight(thickness)
-
     bar._innerBorder = border
 end
 
