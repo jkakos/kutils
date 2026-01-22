@@ -1,11 +1,11 @@
-## Version: 0.1
+## Interface: 120000
+## Version: 0.2
 ## Title: KUtils
 ## Notes: Stores general settings and custom Lua functions for my UI
 ## Author: Kakos
 
 core.lua
 utils.lua
-dynamicGroup.lua
 uiSettings.lua
 playerSpeed.lua
 chatColor.lua
