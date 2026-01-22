@@ -5,7 +5,6 @@
 ## Author: Kakos
 
 core.lua
-utils.lua
 uiSettings.lua
 playerSpeed.lua
 chatColor.lua
