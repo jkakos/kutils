@@ -8,6 +8,11 @@ core.lua
 uiSettings.lua
 playerSpeed.lua
 chatColor.lua
+
 CombatUI/uiConfig.lua
 CombatUI/helpers.lua
-CombatUI/cooldownManager.lua
+CombatUI/style.lua
+CombatUI/layout.lua
+CombatUI/state.lua
+CombatUI/hooks.lua
+CombatUI/core.lua

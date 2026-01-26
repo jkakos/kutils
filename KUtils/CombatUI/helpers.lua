@@ -63,175 +63,28 @@ function addon:GetIconsPerRow(numIcons, rowLimit, totalAllowedIcons, cumulRowLim
     return iconsPerRow
 end
 
--- Add an inner border to an icon
-function addon:AddInnerBorder(button, thickness, r, g, b, a)
-    if button._innerBorder then return end
-    local border = {}
-    a = a or 1
+-- Truncate text at 'lenLimit' characters.
+function addon:TruncateText(text, lenLimit)
+    if not text then return "" end
 
-    -- Left
-    border.left = button:CreateTexture(nil, "OVERLAY")
-    border.left:SetColorTexture(r, g, b, a)
-    border.left:SetPoint("TOPLEFT", 0, 0)
-    border.left:SetPoint("BOTTOMLEFT", 0, 0)
-    border.left:SetWidth(thickness)
-
-    -- Right
-    border.right = button:CreateTexture(nil, "OVERLAY")
-    border.right:SetColorTexture(r, g, b, a)
-    border.right:SetPoint("TOPRIGHT", 0, 0)
-    border.right:SetPoint("BOTTOMRIGHT", 0, 0)
-    border.right:SetWidth(thickness)
-
-    -- Top
-    border.top = button:CreateTexture(nil, "OVERLAY")
-    border.top:SetColorTexture(r, g, b, a)
-    border.top:SetPoint("TOPLEFT", 0, 0)
-    border.top:SetPoint("TOPRIGHT", 0, 0)
-    border.top:SetHeight(thickness)
-
-    -- Bottom
-    border.bottom = button:CreateTexture(nil, "OVERLAY")
-    border.bottom:SetColorTexture(r, g, b, a)
-    border.bottom:SetPoint("BOTTOMLEFT", 0, 0)
-    border.bottom:SetPoint("BOTTOMRIGHT", 0, 0)
-    border.bottom:SetHeight(thickness)
-
-    button._innerBorder = border
-end
-
--- Add a black background to an icon to hide the gaps between the rounded icon
--- corners and the added border.
-function addon:AddIconBackground(button, r, g, b, a)
-    if button._background then return end
-    a = a or 1
-
-    local bg = button:CreateTexture(nil, "BACKGROUND")
-    bg:SetAllPoints(button)
-    bg:SetColorTexture(r, g, b, a)
-    button._background = bg
-end
-
--- Add an inner border to a bar
-function addon:AddBarInnerBorder(bar, thickness, r, g, b, a, isCastBar)
-    if bar._innerBorder then return end
-    isCastBar = isCastBar or false
-    local pad = thickness
-    local border = {}
-
-
-    local frame
-    if isCastBar then
-        frame = CreateFrame("Frame", nil, bar)
+    if string.len(text) > lenLimit then
+        return string.sub(text, 1, lenLimit) .. "..."
     else
-        frame = CreateFrame("Frame", nil, bar:GetParent())
-    end
-
-    -- local frame = CreateFrame("Frame", nil, bar:GetParent())
-    frame:SetFrameLevel(0)
-    frame:SetAllPoints(bar)
-    bar._borderFrame = frame
-
-    local function makeTex(frame, anchor1, anchor2, thickness, isVertical)
-        local borderPoints = {
-            ["TOPLEFT"]      = {-thickness,  thickness},
-            ["TOPRIGHT"]     = { thickness,  thickness},
-            ["BOTTOMLEFT"]   = {-thickness, -thickness},
-            ["BOTTOMRIGHT"]  = { thickness, -thickness},
-        }
-
-        local t = frame:CreateTexture(nil, "BACKGROUND")
-        t:SetColorTexture(r, g, b, a)
-        t:SetPoint(anchor1, unpack(borderPoints[anchor1]))
-        t:SetPoint(anchor2, unpack(borderPoints[anchor2]))
-
-        if isVertical then
-            t:SetWidth(thickness)
-        else
-            t:SetHeight(thickness)
-        end
-
-        return t
-    end
-
-    border.left   = makeTex(frame, "TOPLEFT",    "BOTTOMLEFT",  thickness, true )
-    border.right  = makeTex(frame, "TOPRIGHT",   "BOTTOMRIGHT", thickness, true )
-    border.top    = makeTex(frame, "TOPLEFT",    "TOPRIGHT",    thickness, false)
-    border.bottom = makeTex(frame, "BOTTOMLEFT", "BOTTOMRIGHT", thickness, false)
-    bar._innerBorder = border
-end
-
--- Create a pseudo border around text by adding multiple copies of the text in black
--- behind the text with slight offsets
-function addon:AddFakeTextOutline(text, size)
-    if text._outline then return end
-
-    local parent = text:GetParent()
-    local font, fontSize, flags = text:GetFont()
-
-    local outlineFrame = CreateFrame("Frame", nil, parent)
-    outlineFrame:SetAllPoints(parent)
-    outlineFrame:SetFrameLevel(parent:GetFrameLevel() + 0.5)
-
-    local outlines = {}
-    local offsets = {{-size, 0}, {size, 0}, {0, -size}, {0, size}}
-
-    for i, o in ipairs(offsets) do
-        local fs = outlineFrame:CreateFontString(nil, "OVERLAY")
-        fs:SetDrawLayer("OVERLAY", 1)
-        fs:SetFont(font, fontSize, flags)
-        fs:SetTextColor(0, 0, 0, 1)
-        fs:SetPoint("CENTER", text, o[1], o[2])
-        fs:SetText(text:GetText() or "")
-        outlines[i] = fs
-    end
-
-    -- Keep outline text in sync
-    hooksecurefunc(text, "SetText", function(_, t)
-        for _, fs in ipairs(outlines) do
-            fs:SetText(t or "")
-        end
-    end)
-
-    text._outline = outlines
-end
-
--- Get (r, g, b) values to use for a given class spec
-function addon:GetSpecColor(className, specId)
-    if not className then
-        className = UnitClass("player")
-    end
-    if not specId then
-        specId = C_SpecializationInfo.GetSpecialization()
-    end
-
-    local specColors = {
-        ["Death Knight"] = {{0.77, 0.12, 0.23}, {0.00, 0.50, 1.00}, {0.40, 0.76, 0.28}},
-        ["Demon Hunter"] = {{0.62, 0.62, 1.00}, {0.62, 0.62, 1.00}, {0.62, 0.62, 1.00}},
-        ["Druid"]        = {{0.30, 0.52, 1.00}, {1.00, 0.49, 0.04}, {1.00, 0.49, 0.04} , {0.13, 0.68, 0.19}},
-        ["Mage"]         = {{0.70, 0.30, 1.00}, {1.00, 0.38, 0.00}, {0.00, 0.50, 1.00}},
-        ["Monk"]         = {{0.00, 1.00, 0.60}, {0.00, 1.00, 0.60}, {0.00, 1.00, 0.60}},
-        ["Paladin"]      = {{1.00, 0.87, 0.50}, {1.00, 0.87, 0.50}, {1.00, 0.87, 0.50}},
-        ["Priest"]       = {{1.00, 1.00, 1.00}, {1.00, 1.00, 1.00}, {0.62, 0.62, 1.00}},
-    }
-
-    if specColors[className] and specColors[className][specId] then
-        return unpack(specColors[className][specId])
-    else
-        color = C_ClassColor.GetClassColor(className)
-        return color.r, color.g, color.b, 1
+        return text
     end
 end
 
--- Show the name of the cast on the cast bar truncated at 'lenLimit' characters.
-function addon:CastBarCustomText(spellName, lenLimit)
-    if spellName then
-        if string.len(spellName) > lenLimit then
-            return string.sub(spellName, 1, lenLimit) .. "..."
-        else
-            return spellName
-        end
-    else
-        return ""
-    end
+-- Measure the width of given text with specified font and size
+function addon:GetTextWidth(font, fontSize, text)
+    local measurer = UIParent:CreateFontString(nil, "OVERLAY")
+    measurer:Hide()
+    measurer:SetFont(font, fontSize, "THINOUTLINE")
+    measurer:SetText(text)
+
+    -- Add a little wiggle room to offset and ensure no truncation
+    return math.ceil(measurer:GetStringWidth()) + 4
 end
+
+-- Store text widths for single- and two-digit numbers with one decimal place
+addon.castBarTimerNarrowTextWidth = addon:GetTextWidth(addon.castBarConfig.font, addon.castBarConfig.fontSize,  "2.2")
+addon.castBarTimerWideTextWidth   = addon:GetTextWidth(addon.castBarConfig.font, addon.castBarConfig.fontSize, "22.2")
