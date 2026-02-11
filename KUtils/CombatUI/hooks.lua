@@ -166,7 +166,11 @@ local function HookCastBar()
     hooksecurefunc(bar, "SetStatusBarTexture", function(self) addon:StyleCastBarTexture(self) end)
 
     -- Hide cast spark
-    hooksecurefunc(bar, "ShowSpark", function(self) self:HideSpark() end)
+    hooksecurefunc(bar, "ShowSpark", function(self)
+        if self.Spark then self.Spark:Hide() end
+        if self.StandardGlow then self.StandardGlow:Hide() end
+        if self.ChannelShadow then self.ChannelShadow:Hide() end
+    end)
 
     -- Recolor the cast bar if a spell has been interruppted
     hooksecurefunc(bar, "PlayInterruptAnims", function(self)
