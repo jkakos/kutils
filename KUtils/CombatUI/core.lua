@@ -17,5 +17,6 @@ f:SetScript("OnEvent", function(_, event, arg1)
         f:UnregisterEvent("ADDON_LOADED")
     elseif event == "PLAYER_ENTERING_WORLD" or (event == "PLAYER_SPECIALIZATION_CHANGED" and arg1 == "player") then
         addon.currentSpec = C_SpecializationInfo.GetSpecialization()
+        addon:LayoutCastBar()
     end
 end)
