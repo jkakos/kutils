@@ -349,6 +349,12 @@ function addon:StyleBuffBar(entry)
         bar._borderFrame:SetAllPoints(bar)
     end
 
+    -- Hide bar icon if the bar is associated with a debuff
+    if entry.DebuffBorder then
+        entry.DebuffBorder:Hide()
+        entry.DebuffBorder:SetAlpha(0)
+    end
+
     local bgTexture, sparkTexture, nameText, timerText, barTexture = bar:GetRegions()
 
     -- Background texture
