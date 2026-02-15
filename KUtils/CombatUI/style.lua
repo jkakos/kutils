@@ -337,10 +337,12 @@ function addon:StyleBuffBar(entry)
     if not bar then return end
 
     local config = addon.buffBarConfig
+    local w = config.barWidth
+    local h = config.barHeight
 
     -- Bar size
-    entry:SetSize(config.barWidth, config.barHeight)
-    bar:SetSize(config.barWidth, config.barHeight)
+    entry:SetSize(w, h)
+    bar:SetSize(w, h)
 
     -- Keep the border aligned
     if bar._borderFrame then
@@ -351,7 +353,6 @@ function addon:StyleBuffBar(entry)
 
     -- Background texture
     if bgTexture and bgTexture:GetObjectType() == "Texture" then
-        local w, h = barTexture:GetSize()
         bgTexture:SetVertexColor(unpack(config.backgroundColor))
         bgTexture:SetTexture("Interface\\Tooltips\\UI-Tooltip-Background")
         bgTexture:ClearAllPoints()
