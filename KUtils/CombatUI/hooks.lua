@@ -73,9 +73,17 @@ local function SetUpIconViewerHooks(viewer, config, buttonHookScripts)
     end)
 end
 
+-- Turn off pandemic glow from debuffs that are nearly expired
+local function DisablePandemicGlowOnUpdate(self)
+    self.pandemicStartTime = nil
+end
+
 -- Essential Icons
 local function HookEssentialCooldownViewer()
-    SetUpIconViewerHooks(EssentialCooldownViewer, addon.essentialConfig)
+    local buttonHookScripts = {
+        OnUpdate = DisablePandemicGlowOnUpdate,
+    }
+    SetUpIconViewerHooks(EssentialCooldownViewer, addon.essentialConfig, buttonHookScripts)
 end
 
 -- Utility Icons
@@ -103,6 +111,7 @@ local function HookBuffBarCooldownViewer()
                 addon:StyleBuffBar(entry)
                 entry:HookScript("OnShow", function() addon:LayoutBuffBars(self) end)
                 entry:HookScript("OnHide", function() addon:LayoutBuffBars(self) end)
+                entry:HookScript("OnUpdate", DisablePandemicGlowOnUpdate)
             end
 
             if entry.Bar then
