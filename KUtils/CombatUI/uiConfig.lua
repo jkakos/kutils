@@ -25,7 +25,7 @@ addon.PRIMARY_RESOURCE_HIDDEN = {
 }
 addon.SECONDARY_RESOURCE_HIDDEN = {
     ["Druid"]        = { true, false, false, false},
-    ["Mage"]         = {false,  true,  true},
+    ["Mage"]         = {false,  true,  false},
     ["Monk"]         = {false,  true, false},
     ["Death Knight"] = {false, false, false},
 }
