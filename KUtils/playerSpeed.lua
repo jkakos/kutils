@@ -33,5 +33,7 @@ text:SetText(GetPlayerSpeed())
 
 -- Update text on timer
 C_Timer.NewTicker(UPDATE_INTERVAL, function()
-	text:SetText(GetPlayerSpeed())
+	if not InCombatLockdown() then
+		text:SetText(GetPlayerSpeed())
+	end
 end)
