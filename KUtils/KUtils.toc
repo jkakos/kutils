@@ -9,6 +9,7 @@ uiSettings.lua
 playerSpeed.lua
 chatColor.lua
 actionBarPageAlert.lua
+chatBubbles.lua
 
 CombatUI/uiConfig.lua
 CombatUI/helpers.lua
