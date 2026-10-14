@@ -37,6 +37,7 @@ text:SetJustifyH(JUSTIFY)
 text:SetFont(FONT, FONT_SIZE, FONT_OUTLINE)
 
 -- Update speed text on a timer while the player is moving
+local speedTicker
 frame:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_STARTED_MOVING" then
 		if not speedTicker then
