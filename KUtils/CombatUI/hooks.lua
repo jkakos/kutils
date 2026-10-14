@@ -173,6 +173,7 @@ local function HookCastBar()
 
     -- Reapply texture any time it updates
     hooksecurefunc(bar, "SetStatusBarTexture", function(self) addon:StyleCastBarTexture(self) end)
+    hooksecurefunc(bar, "PlayFinishAnim", function(self) addon:StyleCastBarTexture(self) end)
 
     -- Hide cast spark
     hooksecurefunc(bar, "ShowSpark", function(self)
