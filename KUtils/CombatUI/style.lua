@@ -19,7 +19,7 @@ function addon:AddFakeTextOutline(text, size)
     }
 
     for i, offset in ipairs(offsets) do
-        local fs = outlineFrame:CreateFontString(nil, "OVERLAY", nil, 1)
+        local fs = outlineFrame:CreateFontString(nil, "OVERLAY", nil)
         fs:SetFont(font, fontSize, flags)
         fs:SetTextColor(0, 0, 0, 1)
         fs:SetPoint(    "TOPLEFT", text,     "TOPLEFT", offset[1], offset[2])
